@@ -88,17 +88,26 @@ class Crypto {
       authTagLength: this.at_size,
     })
     let ct
+    let at
 
     if (aad) {
-      cipher.setAAD(Buffer.from(aad), {
-        plaintextLength: Buffer.byteLength(pt),
-      })
+      try {
+        cipher.setAAD(Buffer.from(aad), {
+          plaintextLength: Buffer.byteLength(pt),
+        })
+      } catch (err) {
+        throw err
+      }
     }
 
     ct = cipher.update(pt, 'utf8', encodeas)
     ct += cipher.final(encodeas)
 
-    const at = cipher.getAuthTag()
+    try {
+      at = cipher.getAuthTag()
+    } catch (err) {
+      throw err
+    }
 
     return at ? { ct, at } : { ct }
   }
@@ -108,13 +117,21 @@ class Crypto {
     let pt
 
     if (at) {
-      cipher.setAuthTag(Buffer.from(at))
+      try {
+        cipher.setAuthTag(Buffer.from(at))
+      } catch (err) {
+        throw err
+      }
     }
 
     if (aad) {
-      cipher.setAAD(Buffer.from(aad), {
-        plaintextLength: Buffer.byteLength(ct),
-      })
+      try {
+        cipher.setAAD(Buffer.from(aad), {
+          plaintextLength: Buffer.byteLength(ct),
+        })
+      } catch (err) {
+        throw err
+      }
     }
 
     pt = cipher.update(ct, encodeas, 'utf8')

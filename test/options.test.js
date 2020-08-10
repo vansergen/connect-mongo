@@ -17,70 +17,56 @@ describe('Validate options', () => {
 
   describe('dbName option', () => {
     const dbName = 'dbName-test'
-    test('dbName should be set to databaseName w/ url', () => {
-      return new Promise((resolve) => {
+    test('dbName should be set to databaseName w/ url', done => {
+      store = new MongoStore({
+        url: connectionString,
+        dbName,
+      })
+      store.once('connected', () => {
+        expect(store.db.databaseName).toEqual(dbName)
+        done()
+      })
+    })
+
+    test('dbName should be set to databaseName w/ client', done => {
+      MongoClient.connect(connectionString, mongoOptions, (err, client) => {
+        expect(err).toBeFalsy()
         store = new MongoStore({
-          url: connectionString,
+          client,
           dbName,
         })
         store.once('connected', () => {
           expect(store.db.databaseName).toEqual(dbName)
-          resolve()
+          done()
         })
       })
     })
 
-    test('dbName should be set to databaseName w/ client', () => {
-      return new Promise((resolve) => {
-        MongoClient.connect(connectionString, mongoOptions, (err, client) => {
-          expect(err).toBeFalsy()
-          store = new MongoStore({
-            client,
-            dbName,
-          })
-          store.once('connected', () => {
-            expect(store.db.databaseName).toEqual(dbName)
-            resolve()
-          })
-        })
+    test('dbName should be set to databaseName w/ clientPromise', done => {
+      const clientPromise = MongoClient.connect(connectionString, mongoOptions)
+      store = new MongoStore({
+        clientPromise,
+        dbName,
       })
-    })
-
-    test('dbName should be set to databaseName w/ clientPromise', () => {
-      return new Promise((resolve) => {
-        const clientPromise = MongoClient.connect(
-          connectionString,
-          mongoOptions
-        )
-        store = new MongoStore({
-          clientPromise,
-          dbName,
-        })
-        store.once('connected', () => {
-          expect(store.db.databaseName).toEqual(dbName)
-          resolve()
-        })
+      store.once('connected', () => {
+        expect(store.db.databaseName).toEqual(dbName)
+        done()
       })
     })
   })
 
   describe('autoRemoveInterval', () => {
-    test('not providoing autoRemoveInterval', () => {
-      return new Promise((resolve) => {
-        const dbName = 'dbName-test'
-        const clientPromise = MongoClient.connect(
-          connectionString,
-          mongoOptions
-        )
-        store = new MongoStore({
-          clientPromise,
-          dbName,
-          autoRemove: 'interval',
-        })
-        store.once('connected', () => {
-          expect(store.db.databaseName).toEqual(dbName)
-          resolve()
-        })
+    test('not providoing autoRemoveInterval', done => {
+      const dbName = 'dbName-test'
+      const clientPromise = MongoClient.connect(connectionString, mongoOptions)
+      store = new MongoStore({
+        clientPromise,
+        dbName,
+        autoRemove: 'interval',
+      })
+      store.once('connected', () => {
+        expect(store.db.databaseName).toEqual(dbName)
+        done()
       })
     })
 
